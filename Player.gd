@@ -1,8 +1,9 @@
 extends Camera
+class_name Player
 
-var moveSpeed = 1.0
+var moveSpeed = 0.2
 var jumpForce = 5.0
-var gravity = 12.0
+var gravity = 5.0
 var minLookAngle = -90.0
 var maxLookAngle = 90.0
 var lookSensitivity = 100.0
@@ -10,8 +11,9 @@ var lookSensitivity = 100.0
 var vel = Vector3()
 var mouseDelta = Vector2()
 var mouseLocked = true
+var fly = true
 
-onready var graph = get_parent().get_node("MeshInstance")
+onready var world = get_parent()
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -37,26 +39,36 @@ func _physics_process(delta):
 	
 	var relativeDirection = (forward * input.y + right * input.x)
 	
-	vel.x = relativeDirection.x * moveSpeed
-	vel.z = relativeDirection.z * moveSpeed
+	relativeDirection.y = 0
+	relativeDirection = relativeDirection.normalized()
 	
-#	vel.y -= gravity * delta
+	var mvSpeed = moveSpeed if !fly else moveSpeed * 10
+	vel.x = relativeDirection.x * mvSpeed
+	vel.z = relativeDirection.z * mvSpeed
+	
+	if !fly:
+		vel.y -= gravity * delta
+		
 	if vel.x != 0 or vel.y != 0 or vel.z != 0:
-		graph.pos += vel
+		translation += vel
+		
+	if world == null:
+		return
+	
+	var height = world.f(translation.x, translation.z)	+ 2
+	
+	if translation.y <= height:
+		translation.y = height
 	
 	
 	if Input.is_action_pressed("jump"):
 		vel.y = jumpForce
+	elif Input.is_action_pressed("sneak"):
+		vel.y = -jumpForce
+	elif fly:
+		vel.y = 0
 
 func _process(delta):
-	if Input.is_action_just_pressed("menu"):
-		if mouseLocked:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-			mouseLocked = false
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-			mouseLocked = true
-			
 	if mouseLocked:
 		rotation_degrees.x -= mouseDelta.y * lookSensitivity * delta
 	
@@ -66,5 +78,18 @@ func _process(delta):
 	mouseDelta = Vector2()
 
 func _input(event):
+	if Input.is_action_just_pressed("menu"):
+		if mouseLocked:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			mouseLocked = false
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			mouseLocked = true
+	
 	if event is InputEventMouseMotion:
 		mouseDelta = event.relative
+	if event is InputEventKey and Input.is_key_pressed(KEY_P):
+		var vp = get_viewport()
+		vp.debug_draw = (vp.debug_draw + 1 ) % 4
+	if event is InputEventKey and Input.is_key_pressed(KEY_F):
+		fly = !fly

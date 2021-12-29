@@ -8,15 +8,41 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "MeshInstance",
+"class": "Chunk",
+"language": "GDScript",
+"path": "res://Chunk.gd"
+}, {
+"base": "Node",
+"class": "FutureThreadPool",
+"language": "GDScript",
+"path": "res://addons/thread_pool/future_thread_pool.gd"
+}, {
+"base": "Camera",
+"class": "Player",
+"language": "GDScript",
+"path": "res://Player.gd"
+} ]
+_global_script_class_icons={
+"Chunk": "",
+"FutureThreadPool": "",
+"Player": ""
+}
+
 [application]
 
 config/name="GraphWorld"
-run/main_scene="res://GraphWorld.tscn"
+run/main_scene="res://World.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
-Debug="*res://Debug.gd"
+ThreadPool="*res://addons/thread_pool/thread_pool.gd"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/thread_pool/plugin.cfg" )
 
 [global]
 
@@ -52,6 +78,11 @@ jump={
 menu={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777217,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+ ]
+}
+sneak={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777238,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
 
